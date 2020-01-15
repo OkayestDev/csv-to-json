@@ -1,4 +1,5 @@
 {
+    "writeToFile": false,
     "rowsToIgnore": [0, 1],
     "columnsToIgnore": [],
     "columnDefinitions": {

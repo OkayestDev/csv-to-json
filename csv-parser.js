@@ -44,6 +44,9 @@ for (let row = 0; row < rows.length; row++) {
     }
 }
 
-
-const FILE_TO_WRITE = "result.json";
-fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
+if (jsonSchema.writeToFile) {
+    const FILE_TO_WRITE = "result.json";
+    fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
+} else {
+    console.info(parsedCSV);
+}
