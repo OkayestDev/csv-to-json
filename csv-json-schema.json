@@ -1,0 +1,19 @@
+{
+    "rowsToIgnore": [0, 1],
+    "columnsToIgnore": [],
+    "columnDefinitions": {
+        "0": {
+            "name": "object",
+            "isArray": false
+        },
+        "1": {
+            "name": "description",
+            "isArray": false
+        },
+        "2": {
+            "name": "permissions",
+            "isArray": true,
+            "deliminator": "\n"
+        }
+    }
+}
