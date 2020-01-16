@@ -1,6 +1,7 @@
 const fs = require("fs");
 const jsonSchema = require("./csv-json-schema.json");
 const paraParser = require("papaparse");
+const clipboardy = require("clipboardy");
 
 // Skip first two args (`node` and name of script)
 const args = process.argv.slice(2);
@@ -49,3 +50,4 @@ if (jsonSchema.writeToFile) {
   fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
 }
 console.info(parsedCSV);
+clipboardy.writeSync(parsedCSV);
