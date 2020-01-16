@@ -1,12 +1,12 @@
-const fs = require('fs');
-const jsonSchema = require('./csv-json-schema.json');
-const paraParser = require('papaparse');
+const fs = require("fs");
+const jsonSchema = require("./csv-json-schema.json");
+const paraParser = require("papaparse");
 
 // Skip first two args (`node` and name of script)
 const args = process.argv.slice(2);
 
 if (args.length !== 1) {
-  console.info('Provider a absolute path to .csv file');
+  console.info("Provide an absolute path to .csv file");
   process.exit(1);
 }
 
@@ -17,36 +17,35 @@ const rows = content.data;
 const parsedCSV = [];
 
 for (let row = 0; row < rows.length; row++) {
-    if (jsonSchema.rowsToIgnore.includes(row)) {
-        continue;
+  if (jsonSchema.rowsToIgnore.includes(row)) {
+    continue;
+  }
+
+  const indexToAddTo = parsedCSV.length;
+  parsedCSV.push({});
+
+  const columns = rows[row];
+  for (let column = 0; column < columns.length; column++) {
+    let value = columns[column];
+    if (jsonSchema.columnsToIgnore.includes(column)) {
+      continue;
     }
 
-    const indexToAddTo = parsedCSV.length;
-    parsedCSV.push({});
+    const columnString = String(column);
+    if (columnString in jsonSchema.columnDefinitions) {
+      const columnDefinition = jsonSchema.columnDefinitions[columnString];
 
-    const columns = rows[row];
-    for (let column = 0; column < columns.length; column++) {
-        let value = columns[column];
-        if (jsonSchema.columnsToIgnore.includes(column)) {
-            continue;
-        }
+      if (columnDefinition.isArray) {
+        value = value.split(columnDefinition.deliminator);
+      }
 
-        const columnString = String(column);
-        if (columnString in jsonSchema.columnDefinitions) {
-            const columnDefinition = jsonSchema.columnDefinitions[columnString];
-
-            if (columnDefinition.isArray) {
-                value = value.split(columnDefinition.deliminator);
-            }
-
-            parsedCSV[indexToAddTo][columnDefinition.name] = value
-        }
+      parsedCSV[indexToAddTo][columnDefinition.name] = value;
     }
+  }
 }
 
 if (jsonSchema.writeToFile) {
-    const FILE_TO_WRITE = "result.json";
-    fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
-} else {
-    console.info(parsedCSV);
+  const FILE_TO_WRITE = "result.json";
+  fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
 }
+console.info(parsedCSV);
