@@ -1,5 +1,6 @@
 {
   "writeToFile": false,
+  "fileName": "results.json",
   "rowsToIgnore": [0, 1],
   "columnsToIgnore": [],
   "columnDefinitions": {

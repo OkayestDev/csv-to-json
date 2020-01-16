@@ -11,43 +11,75 @@ if (args.length !== 1) {
   process.exit(1);
 }
 
-const filePath = args[0].replace(/\//g, "/"); // Allows cross platform file destination
-const fileContents = fs.readFileSync(filePath).toString();
-const content = paraParser.parse(fileContents);
-const rows = content.data;
-const parsedCSV = [];
+function parseCSVFile(filePath) {
+  filePath = filePath.replace(/\//g, "/");
+  const fileContents = fs.readFileSync(filePath).toString();
+  const content = paraParser.parse(fileContents);
+  const rows = content.data;
+  const parsedCSV = [];
 
-for (let row = 0; row < rows.length; row++) {
-  if (jsonSchema.rowsToIgnore.includes(row)) {
-    continue;
-  }
-
-  const indexToAddTo = parsedCSV.length;
-  parsedCSV.push({});
-
-  const columns = rows[row];
-  for (let column = 0; column < columns.length; column++) {
-    let value = columns[column];
-    if (jsonSchema.columnsToIgnore.includes(column)) {
+  for (let row = 0; row < rows.length; row++) {
+    if (jsonSchema.rowsToIgnore.includes(row)) {
       continue;
     }
 
-    const columnString = String(column);
-    if (columnString in jsonSchema.columnDefinitions) {
-      const columnDefinition = jsonSchema.columnDefinitions[columnString];
+    const indexToAddTo = parsedCSV.length;
+    parsedCSV.push({});
 
-      if (columnDefinition.isArray) {
-        value = value.split(columnDefinition.deliminator);
+    const columns = rows[row];
+    for (let column = 0; column < columns.length; column++) {
+      let value = columns[column];
+      if (jsonSchema.columnsToIgnore.includes(column)) {
+        continue;
       }
 
-      parsedCSV[indexToAddTo][columnDefinition.name] = value;
+      const columnString = String(column);
+      if (columnString in jsonSchema.columnDefinitions) {
+        const columnDefinition = jsonSchema.columnDefinitions[columnString];
+
+        if (columnDefinition.isArray) {
+          value = value.split(columnDefinition.deliminator);
+        }
+
+        parsedCSV[indexToAddTo][columnDefinition.name] = value;
+      }
     }
   }
+
+  return parsedCSV;
 }
 
-if (jsonSchema.writeToFile) {
-  const FILE_TO_WRITE = "result.json";
-  fs.writeFileSync(FILE_TO_WRITE, JSON.stringify(parsedCSV));
+function walkSync(dir, filePathList = []) {
+  let files = fs.readdirSync(dir);
+  files.forEach(function(file) {
+    if (fs.statSync(dir + "/" + file).isDirectory()) {
+      filePathList = walkSync(dir + "/" + file, filePathList);
+    } else {
+      filePathList.push(dir + "/" + file);
+    }
+  });
+  return filePathList;
 }
-console.info(parsedCSV);
-clipboardy.writeSync(parsedCSV);
+
+const filePath = args[0].replace(/\//g, "/"); // Allows cross platform file destination
+console.info(filePath);
+let fileStats = fs.lstatSync(filePath);
+let parsedCSV = [];
+
+if (fileStats.isDirectory()) {
+  const fileList = walkSync(filePath);
+  fileList.forEach(file => {
+    const currentParsedCSV = parseCSVFile(file);
+    parsedCSV = [...parsedCSV, ...currentParsedCSV];
+  });
+} else {
+  parsedCSV = parseCSVFile(filePath);
+}
+
+const json = JSON.stringify(parsedCSV);
+if (jsonSchema.writeToFile) {
+  fs.writeFileSync(jsonSchema.fileName, json);
+}
+
+console.info(json);
+clipboardy.writeSync(json);
