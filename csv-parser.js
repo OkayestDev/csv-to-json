@@ -16,17 +16,22 @@ if (args.length !== 1) {
 }
 
 const filePath = args[0].replace(/\//g, "/"); // Allows cross platform file destination
-let parsedCSV = [];
+let parsedCSV = {};
 
 // Parse CSV files
 const fileList = getFileList(filePath);
 fileList.forEach(file => {
+  // Add filename to parsed results to handle multiple sheets
+  const fileParts = file.split("/");
+  const fileName = fileParts[fileParts.length - 1];
+  parsedCSV[fileName] = [];
+
   if (jsonSchema.hasHeaders) {
     const currentParsedCSV = parseCSVHeaderFile(file);
-    parsedCSV.push(currentParsedCSV);
+    parsedCSV[fileName].push(currentParsedCSV);
   } else {
     const currentParsedCSV = parseCSVNoHeaderFile(file);
-    parsedCSV = [...parsedCSV, ...currentParsedCSV];
+    parsedCSV[fileName] = [...parsedCSV[fileName], ...currentParsedCSV];
   }
 });
 
