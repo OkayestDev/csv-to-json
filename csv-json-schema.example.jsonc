@@ -1,7 +1,7 @@
 {
   "writeToFile": false,
   "fileName": "results.json",
-  "rowsToIgnore": [0, 1],
+  "rowsToIgnore": [],
   "rowsToInclude": [],
   "hasHeaders": true,
   "headerColumnStart": 2,
@@ -9,15 +9,21 @@
     "indexOfSplitIsHeader": 0,
     "deliminator": "\n"
   },
-  "childColumn": 0,
-  "intersectionWithHeaderDefinition": {
-    "isArray": true,
-    "deliminator": "\n"
-  },
+  "childColumn": "0" // to be used as a child for each header
+  // Use if csv file doesn't have headers
   "columnDefinitions": {
     "0": {
       "name": "object",
       "isArray": false
+    },
+    "1": {
+      "name": "description",
+      "isArray": false
+    },
+    "2": {
+      "name": "permissions",
+      "isArray": true,
+      "deliminator": "\n"
     }
   }
 }
